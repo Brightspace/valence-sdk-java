@@ -24,7 +24,7 @@ the License.
     session.setAttribute("userKey", "");
     if(session.getAttribute("appKey") == null) session.setAttribute("appID", "G9nUpvbZQyiPrk3um2YAkQ");
     if(session.getAttribute("appId") == null) session.setAttribute("appKey", "ybZu7fm_JKJTFwKEHfoZ7Q");
-    if(session.getAttribute("host") == null) session.setAttribute("host", "valence.desire2learn.com");
+    if(session.getAttribute("host") == null) session.setAttribute("host", "lms.valence.desire2learn.com");
     if(session.getAttribute("port") == null) session.setAttribute("port", "443");
     if(session.getAttribute("scheme") == null) session.setAttribute("scheme", "https");
 
