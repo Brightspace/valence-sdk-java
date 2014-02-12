@@ -19,9 +19,9 @@ import org.junit.*;
  *
  * @author alamarre
  */
-public class MainTests {
+public class MainTest {
     
-    public MainTests() {
+    public MainTest() {
     }
 
     @BeforeClass
@@ -162,22 +162,7 @@ public class MainTests {
             Assert.assertEquals( expectedTarget, parameter );
         } catch(Exception e) {
             Assert.fail();
-        }    
-    }
-
-    @Test
-    public void AuthContext_CreateWebUrlForAuth_ReturnsUri_AndQueryParam_type_IsMobile() {
-        ID2LAppContext appContext = createAuthenticationSecurityObjectUnderTest();
-
-        try {
-            URI uri = appContext.createWebUrlForAuthentication(
-                TEST_HOST_NAME, TEST_PORT, new URI( TEST_API_URL ) );
-
-            String parameter = getURIQueryParameter( uri, "type" );
-            Assert.assertEquals( "mobile", parameter );
-        } catch(Exception e) {
-            Assert.fail();
-        }   
+        }
     }
 
     @Test
