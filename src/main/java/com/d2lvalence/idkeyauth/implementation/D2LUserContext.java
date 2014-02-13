@@ -21,6 +21,7 @@ package com.d2lvalence.idkeyauth.implementation;
 import com.d2lvalence.idkeyauth.D2LUserContextParameters;
 import com.d2lvalence.idkeyauth.ID2LUserContext;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 
 /**
@@ -29,7 +30,6 @@ import java.net.URI;
  * @see ID2LUserContext
  */
 public class D2LUserContext implements ID2LUserContext {
-    
     
     /**
      * Creates a User Context with the provided parameters
@@ -42,16 +42,6 @@ public class D2LUserContext implements ID2LUserContext {
     }
 
     @Override
-    public String getHostName() {
-        return parameters.getHostName();
-    }
-
-    @Override
-    public int getPort() {
-        return parameters.getPort();
-    }
-
-    @Override
     public String getUserId() {
         return parameters.getUserId();
     }
@@ -60,8 +50,6 @@ public class D2LUserContext implements ID2LUserContext {
     public String getUserKey() {
         return parameters.getUserKey();
     }
-    
-    
 
     @Override
     public long getServerSkewMillis() {
@@ -73,22 +61,22 @@ public class D2LUserContext implements ID2LUserContext {
         this._serverSkewMillis = _serverSkewMillis;
     }
     
-    
-    
     @Override
     public URI createAuthenticatedUri( String path, String httpMethod ) {
-        String uriScheme = getUriScheme();
-        
+            int split = path.indexOf("?");
+            String query = "";
+            if(split >= 0){
+                query = path.substring(split+1);
+                path = path.substring(0, split);
+            }
+            String queryString = getQueryString(path, query, httpMethod );
         try {
-            URI originalURI =new URI(getUriScheme()+"://"+parameters.getHostName()+path.replace("%", "%25"));
-            
-            String queryString = getQueryString( originalURI.getPath(),originalURI.getQuery(), httpMethod );
-            URI uri = new URI( uriScheme+"://"+parameters.getHostName()+":"+parameters.getPort()+originalURI.getPath()+queryString );
+            URI uri = new URI(parameters.getUrl() + path + queryString );
             return uri;
-        } catch(Exception e) {
+        } catch(URISyntaxException e) {
             e.printStackTrace();
+            return null;
         }
-        return null;
     }
     
     @Override
@@ -102,20 +90,7 @@ public class D2LUserContext implements ID2LUserContext {
         }
         return false;
     }
-    
-    /**
-     * Returns the URI scheme (HTTP or HTTPS) based on whether to encrypt or not
-     * 
-     * @return The String value of the appropriate URI scheme
-     */
-    private String getUriScheme() {
-        if( parameters.isEncryptOperations() ) {
-            return Constants.URI_SECURE_SCHEME;
-        } else {           
-            return Constants.URI_UNSECURE_SCHEME;
-        }
-    }
-    
+
     @Override
     public D2LUserContextParameters getParameters() {
         return parameters;

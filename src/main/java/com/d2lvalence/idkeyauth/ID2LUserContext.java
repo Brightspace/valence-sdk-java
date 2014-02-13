@@ -26,18 +26,6 @@ import java.net.URI;
 public interface ID2LUserContext {
     
     /**
-     * Returns the host name of the D2L server
-     * @return The D2L server host name
-     */
-    public String getHostName();
-    
-    /**
-     * Returns the port used to communicate with the D2L server
-     * @return the port used to communicate with the D2L server
-     */
-    public int getPort();
-    
-    /**
      * Returns the userID (aka tokenID) of the current user
      * @return The userID (aka tokenID) of the current user
      */
