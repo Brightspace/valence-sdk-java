@@ -27,52 +27,16 @@ public class D2LUserContextParameters implements Serializable {
 
     String _userId;
     String _userKey;
-    String _appId;
-    String _appKey;
-    String _url;
 
     /**
      * Creates D2LUserContextParameters with the parameters provided
      *
-     * @param appId The application ID provided by the key tool
-     * @param appKey The application key provided by the key tool
      * @param userId The D2L user ID to be used
      * @param userKey The D2L user key to be used
-     * @param url The url of the D2L instance
      */
-    public D2LUserContextParameters(String appId, String appKey, String userId, String userKey, String url) {
+    public D2LUserContextParameters(String userId, String userKey) {
         this._userId = userId;
         this._userKey = userKey;
-        this._appId = appId;
-        this._appKey = appKey;
-        this._url = url;
-    }
-
-    /**
-     * Returns the Application ID of the application
-     *
-     * @return the Application ID of the application
-     */
-    public String getAppId() {
-        return _appId;
-    }
-
-    /**
-     * Returns the Application Key of the application
-     *
-     * @return the Application Key of the application
-     */
-    public String getAppKey() {
-        return _appKey;
-    }
-
-    /**
-     * Returns the Url that will be used to access the D2L instance
-     *
-     * @return the Url of the D2L instance
-     */
-    public String getUrl() {
-        return _url;
     }
 
     /**

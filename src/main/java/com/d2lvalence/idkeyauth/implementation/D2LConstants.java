@@ -22,8 +22,7 @@ package com.d2lvalence.idkeyauth.implementation;
 /**
  * Stores constants relevant to communication with the LMS
  */
-class Constants {
+class D2LConstants {
     public static String AUTHENTICATION_SERVICE_URI_PATH = "/d2l/auth/api/token";
-    public static String URI_SECURE_SCHEME = "https";
-    public static String URI_UNSECURE_SCHEME = "http";
+    
 }

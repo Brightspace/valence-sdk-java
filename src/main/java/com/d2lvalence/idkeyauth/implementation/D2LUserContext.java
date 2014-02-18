@@ -31,14 +31,34 @@ import java.net.URISyntaxException;
  */
 public class D2LUserContext implements ID2LUserContext {
     
+    private final String instanceUrl;
+    private final String appId;
+    private final String appKey;
+    
+    private long _serverSkewMillis;
+    private final D2LUserContextParameters parameters;
+    private final ITimestampProvider _timestampProvider;
+    
+    private static final String APP_ID_PARAMETER = "x_a";
+    private static final String USER_ID_PARAMETER = "x_b";
+    private static final String SIGNATURE_BY_APP_KEY_PARAMETER = "x_c";
+    private static final String SIGNATURE_BY_USER_KEY_PARAMETER = "x_d";
+    private static final String TIMESTAMP_PARAMETER = "x_t";
+        
+
     /**
      * Creates a User Context with the provided parameters
+     * @param url the url of the D2Linstance
+     * @param appId the Application Id
+     * @param appKey The Application Key
      * @param parameters The parameters which the context should use
      */
-    D2LUserContext( D2LUserContextParameters parameters ) {
-        this.parameters=parameters;
+    public D2LUserContext(String url, String appId, String appKey, D2LUserContextParameters parameters) {
+        this.instanceUrl = url;
+        this.appId = appId;
+        this.appKey = appKey;
+        this.parameters = parameters;
         _timestampProvider=new DefaultTimestampProvider();
-        //_timestampProvider = ObjectFactory.GetInstance<ITimestampProvider>();
     }
 
     @Override
@@ -71,7 +91,7 @@ public class D2LUserContext implements ID2LUserContext {
             }
             String queryString = getQueryString(path, query, httpMethod );
         try {
-            URI uri = new URI(parameters.getUrl() + path + queryString );
+            URI uri = new URI(instanceUrl + path + queryString );
             return uri;
         } catch(URISyntaxException e) {
             e.printStackTrace();
@@ -105,12 +125,12 @@ public class D2LUserContext implements ID2LUserContext {
      * @return A query string with the relevant authentication parameters
      */
     private String buildAuthenticatedUriQueryString( String signature, long timestamp ) {
-        String queryString = "?" + APP_ID_PARAMETER + "=" + parameters.getAppId();
+        String queryString = "?" + APP_ID_PARAMETER + "=" + appId;
         if(parameters.getUserId()!=null) {
             queryString += "&" + USER_ID_PARAMETER + "=" + parameters.getUserId();
         }
         queryString += "&" + SIGNATURE_BY_APP_KEY_PARAMETER;
-        queryString += "=" + D2LSigner.getBase64HashString( parameters.getAppKey(), signature );
+        queryString += "=" + D2LSigner.getBase64HashString( appKey, signature );
         if(parameters.getUserId()!=null) {
             queryString += "&" + SIGNATURE_BY_USER_KEY_PARAMETER;
             queryString += "=" + D2LSigner.getBase64HashString( parameters.getUserKey(), signature );
@@ -177,19 +197,5 @@ public class D2LUserContext implements ID2LUserContext {
         
         return D2LUserContext.RESULT_UNKNOWN;
     }
-            
-     
-    private long _serverSkewMillis;
-
-    private D2LUserContextParameters parameters;
-    private final ITimestampProvider _timestampProvider;
-
-    private final String APP_ID_PARAMETER = "x_a";
-    private final String USER_ID_PARAMETER = "x_b";
-    private final String SIGNATURE_BY_APP_KEY_PARAMETER = "x_c";
-    private final String SIGNATURE_BY_USER_KEY_PARAMETER = "x_d";
-    private final String TIMESTAMP_PARAMETER = "x_t";
-    
-    
 
 }

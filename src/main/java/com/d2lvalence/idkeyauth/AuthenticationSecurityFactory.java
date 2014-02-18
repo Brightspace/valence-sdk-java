@@ -34,7 +34,7 @@ public class AuthenticationSecurityFactory {
      * servers with the given application information
      * @see ID2LAppContext
      */
-    public ID2LAppContext createSecurityContext(String appId, String appKey) {
-        return new D2LAppContext(appId, appKey);
+    public static ID2LAppContext createSecurityContext(String appId, String appKey, String url) {
+        return new D2LAppContext(appId, appKey, url);
     }
 }

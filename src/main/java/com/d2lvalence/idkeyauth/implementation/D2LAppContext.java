@@ -20,7 +20,9 @@ package com.d2lvalence.idkeyauth.implementation;
 import com.d2lvalence.idkeyauth.D2LUserContextParameters;
 import com.d2lvalence.idkeyauth.ID2LAppContext;
 import com.d2lvalence.idkeyauth.ID2LUserContext;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 
@@ -30,36 +32,42 @@ import java.util.HashMap;
  * @see ID2LAppContext
  */
 public class D2LAppContext implements ID2LAppContext {
+    
+    private static final String APP_ID_PARAMETER = "x_a";
+    private static final String APP_KEY_PARAMETER = "x_b";
+    private static final String CALLBACK_URL_PARAMETER = "x_target";
+    private static final String TYPE_PARAMETER = "type";
+    private static final String TYPE_PARAMETER_VALUE = "mobile";
+    private static final String USER_ID_CALLBACK_PARAMETER = "x_a";
+    private static final String USER_KEY_CALLBACK_PARAMETER = "x_b";
 
     private final String _appId;
     private final String _appKey;
-
-    private final String APP_ID_PARAMETER = "x_a";
-    private final String APP_KEY_PARAMETER = "x_b";
-    private final String CALLBACK_URL_PARAMETER = "x_target";
-    private final String TYPE_PARAMETER = "type";
-    private final String TYPE_PARAMETER_VALUE = "mobile";
-    private final String USER_ID_CALLBACK_PARAMETER = "x_a";
-    private final String USER_KEY_CALLBACK_PARAMETER = "x_b";
+    private final String _url;
 
     /**
      * Constructs a D2LAppContext with the provided application values
      *
      * @param appId The application ID provided by the key tool
      * @param appKey The application key provided by the key tool
+     * @param url The url of the D2L instance
      */
-    public D2LAppContext(String appId, String appKey) {
+    public D2LAppContext(String appId, String appKey, String url) {
         _appId = appId;
         _appKey = appKey;
+        if(url != null && url.endsWith("/")){
+            _url = url.substring(0, url.lastIndexOf("/"));
+        }else {
+            _url = url;
+        }
     }
 
     @Override
-    public URI createWebUrlForAuthentication(String url, URI resultUri) {
+    public URI createWebUrlForAuthentication(URI redirectUrl) {
         try {
-            URI uri = new URI(url + Constants.AUTHENTICATION_SERVICE_URI_PATH + "?" + buildAuthenticationUriQueryString(resultUri));
-            //uri. = BuildAuthenticationUriQueryString( resultUri );
+            URI uri = new URI(_url + D2LConstants.AUTHENTICATION_SERVICE_URI_PATH + "?" + buildAuthenticationUriQueryString(redirectUrl));
             return uri;
-        } catch (Exception e) {
+        } catch (URISyntaxException e) {
             return null;
         }
     }
@@ -77,34 +85,37 @@ public class D2LAppContext implements ID2LAppContext {
     }
 
     @Override
-    public ID2LUserContext createUserContext(URI uri, String url) {
-
-        HashMap<String, String> r = getParameters(uri.getQuery());
-        //use a mock servlet request so we can retrieve parameters from the uri convenientyl
-        String userId = r.get(USER_ID_CALLBACK_PARAMETER);
-        String userKey = r.get(USER_KEY_CALLBACK_PARAMETER);
-        if (userId == null || userKey == null) {
+    public ID2LUserContext createUserContext(URI uri) {
+        if(uri.getQuery() != null){
+            HashMap<String, String> r = getParameters(uri.getQuery());
+            //use a mock servlet request so we can retrieve parameters from the uri conveniently
+            String userId = r.get(USER_ID_CALLBACK_PARAMETER);
+            String userKey = r.get(USER_KEY_CALLBACK_PARAMETER);
+            if (userId == null || userKey == null) {
+                return null;
+            }
+            D2LUserContextParameters parameters = compileOperationSecurityParameters(userId, userKey);
+            return new D2LUserContext(_url, _appId, _appKey, parameters);
+        } else {
             return null;
         }
-        D2LUserContextParameters parameters = compileOperationSecurityParameters(userId, userKey, url);
-        return new D2LUserContext(parameters);//new D2LOperationSecurity( parameters );
     }
 
     @Override
-    public ID2LUserContext createUserContext(String userId, String userKey, String url) {
-        D2LUserContextParameters parameters = compileOperationSecurityParameters(userId, userKey, url);
-        return new D2LUserContext(parameters);
+    public ID2LUserContext createUserContext(String userId, String userKey) {
+        D2LUserContextParameters parameters = compileOperationSecurityParameters(userId, userKey);
+        return new D2LUserContext(_url, _appId, _appKey, parameters);
     }
 
     @Override
-    public ID2LUserContext createAnonymousUserContext(String url) {
-        D2LUserContextParameters parameters = compileOperationSecurityParameters(null, null, url);
-        return new D2LUserContext(parameters);
+    public ID2LUserContext createAnonymousUserContext() {
+        D2LUserContextParameters parameters = compileOperationSecurityParameters(null, null);
+        return new D2LUserContext(_url, _appId, _appKey, parameters);
     }
 
     @Override
     public ID2LUserContext createUserContext(D2LUserContextParameters parameters) {
-        return new D2LUserContext(parameters);
+        return new D2LUserContext(_url, _appId, _appKey, parameters);
     }
 
     /**
@@ -121,10 +132,9 @@ public class D2LAppContext implements ID2LAppContext {
         result += "&" + APP_KEY_PARAMETER + "=" + uriHash;
         try {
             result += "&" + CALLBACK_URL_PARAMETER + "=" + URLEncoder.encode(callbackUriString, "UTF-8");
-        } catch (Exception e) {
+        } catch (UnsupportedEncodingException e) {
             result += "&" + CALLBACK_URL_PARAMETER + "=" + URLEncoder.encode(callbackUriString);
         }
-        //result += "&" + TYPE_PARAMETER + "=" + TYPE_PARAMETER_VALUE;
         return result;
     }
 
@@ -134,15 +144,24 @@ public class D2LAppContext implements ID2LAppContext {
      *
      * @param userId The D2L user ID to be stored
      * @param userKey The D2L user key to be stored
-     * @param hostName The host name of the D2L server
-     * @param port The port to connect to the D2L server on
-     * @param encryptOperations Whether the connection should be encrypted
      * @see OperationSecurityParameters
      * @return
      */
-    private D2LUserContextParameters compileOperationSecurityParameters(String userId, String userKey, String url) {
-        D2LUserContextParameters parameters = new D2LUserContextParameters(_appId, _appKey, userId, userKey, url);
+    private D2LUserContextParameters compileOperationSecurityParameters(String userId, String userKey) {
+        D2LUserContextParameters parameters = new D2LUserContextParameters(userId, userKey);
         return parameters;
+    }
+
+    public String getAppId() {
+        return _appId;
+    }
+
+    public String getAppKey() {
+        return _appKey;
+    }
+
+    public String getUrl() {
+        return _url;
     }
 
 }

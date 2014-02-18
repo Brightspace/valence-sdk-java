@@ -5,8 +5,10 @@
 package com.d2lvalence.idkeyauth.unittests;
 
 import com.d2lvalence.idkeyauth.AuthenticationSecurityFactory;
+import com.d2lvalence.idkeyauth.D2LUserContextParameters;
 import com.d2lvalence.idkeyauth.ID2LAppContext;
 import com.d2lvalence.idkeyauth.ID2LUserContext;
+import com.d2lvalence.idkeyauth.implementation.D2LAppContext;
 import com.d2lvalence.idkeyauth.implementation.D2LSigner;
 import com.d2lvalence.idkeyauth.implementation.D2LUserContext;
 import java.lang.reflect.Field;
@@ -23,12 +25,12 @@ public class MainTest {
 
     private final String TEST_APP_ID = "foo";
     private final String TEST_APP_KEY = "asdfghjkasdfghjk";
-    
+
     private final String TEST_HOST_NAME = "authenticationhost.com";
     private final int TEST_PORT = 44444;
-    private final String TEST_HTTP_URL = "http://" + TEST_HOST_NAME +":"+ TEST_PORT;
-    private final String TEST_HTTPS_URL = "https://" + TEST_HOST_NAME +":"+ TEST_PORT;
-    
+    private final String TEST_HTTP_URL = "http://" + TEST_HOST_NAME + ":" + TEST_PORT;
+    private final String TEST_HTTPS_URL = "https://" + TEST_HOST_NAME + ":" + TEST_PORT;
+
     private final String TEST_API_URL = "http://univ.edu/d2l/api/lp/1.0/organization/info";
     private final String TEST_API_PATH = "/d2l/api/lp/1.0/organization/info";
 
@@ -64,7 +66,6 @@ public class MainTest {
     public void authenticationSecurityFactory_CreatesAuthenticationSecurityObject() {
         ID2LAppContext appContext = createAuthenticationSecurityObjectUnderTest();
         assert (appContext instanceof ID2LAppContext);
-        //Assert.IsInstanceOf<ID2LAuthenticationSecurity>( appContext );
     }
 
     @Test
@@ -82,147 +83,96 @@ public class MainTest {
     }
 
     @Test
-    public void AuthContext_CreateWebUrlForAuth_ReturnsURI_WhereHost_MatchesInput() {
-        ID2LAppContext appContext = createAuthenticationSecurityObjectUnderTest();
-
-        try {
-            URI uri = appContext.createWebUrlForAuthentication(TEST_HTTP_URL, new URI(TEST_API_URL));
-
-            Assert.assertEquals(TEST_HOST_NAME, uri.getHost());
-        } catch (Exception e) {
-            Assert.fail();
-        }
+    public void AuthContext_CreateWebUrlForAuth_ReturnsURI_WhereHost_MatchesInput() throws URISyntaxException {
+        ID2LAppContext appContext = AuthenticationSecurityFactory.createSecurityContext(TEST_APP_ID, TEST_APP_KEY, "http://thishost.com:1337/");
+        URI uri = appContext.createWebUrlForAuthentication(new URI(TEST_API_URL));
+        uri.toString();
+        Assert.assertEquals("thishost.com", uri.getHost());
     }
 
     @Test
-    public void AuthContext_CreateWebUrlForAuth_ReturnsURI_WherePortNumber_MatchesInput() {
+    public void AuthContext_CreateWebUrlForAuth_ReturnsURI_WherePortNumber_MatchesInput() throws URISyntaxException {
         final int expectedPortNumber = 44480;
-        ID2LAppContext appContext = createAuthenticationSecurityObjectUnderTest();
-        try {
-            URI uri = appContext.createWebUrlForAuthentication("http://anythinghere.com:44480", new URI(TEST_API_URL));
-            Assert.assertEquals(expectedPortNumber, uri.getPort());
-        } catch (Exception e) {
-            Assert.fail();
-        }
+        ID2LAppContext appContext = AuthenticationSecurityFactory.createSecurityContext(TEST_APP_ID, TEST_APP_KEY, "http://anythinghere.com:44480");
+        URI uri = appContext.createWebUrlForAuthentication(new URI("http://redirecttohere.com"));
+        Assert.assertEquals(expectedPortNumber, uri.getPort());
     }
 
     @Test
-    public void AuthContext_CreateWebUrlForAuth_ReturnsURI_WithPath_ToTokenService() {
+    public void AuthContext_CreateWebUrlForAuth_ReturnsURI_WithPath_ToTokenService() throws URISyntaxException {
         ID2LAppContext appContext = createAuthenticationSecurityObjectUnderTest();
-
-        try {
-            URI uri = appContext.createWebUrlForAuthentication(TEST_HTTP_URL, new URI(TEST_API_URL));
-
-            Assert.assertEquals(EXPECTED_TOKEN_SERVICE_PATH, uri.getPath());
-        } catch (Exception e) {
-            Assert.fail();
-        }
+        URI uri = appContext.createWebUrlForAuthentication(new URI("http://redirecttohere.com"));
+        Assert.assertEquals(EXPECTED_TOKEN_SERVICE_PATH, uri.getPath());
 
     }
 
     @Test
-    public void AuthContext_CreateWebUrlForAuth_ReturnsURI_AndQueryParam_x_a_Matches_AppId() {
+    public void AuthContext_CreateWebUrlForAuth_ReturnsURI_AndQueryParam_x_a_Matches_AppId() throws Exception {
+        ID2LAppContext appContext = createAuthenticationSecurityObjectUnderTest();
+        URI uri = appContext.createWebUrlForAuthentication(new URI(TEST_API_URL));
+        String parameter = getURIQueryParameter(uri, "x_a");
+        Assert.assertEquals(TEST_APP_ID, parameter);
+    }
+
+    @Test
+    public void AuthContext_CreateWebUrlForAuth_ReturnsURI_AndQueryParam_x_b_MatchesURISignedWithAppKey() throws Exception {
+        ID2LAppContext appContext = AuthenticationSecurityFactory.createSecurityContext(TEST_APP_ID, TEST_APP_KEY, "http://d2l.com/");
+        String expectedSignedURI = D2LSigner.getBase64HashString(TEST_APP_KEY, "http://redirecttohere.com/");
+        URI uri = appContext.createWebUrlForAuthentication(new URI("http://redirecttohere.com/"));
+        String parameter = getURIQueryParameter(uri, "x_b");
+        Assert.assertEquals(expectedSignedURI, parameter);
+    }
+
+    @Test
+    public void AuthContext_CreateWebUrlForAuth_ReturnsURI_AndQueryParam_x_target_MatchesResultUrl() throws Exception {
         ID2LAppContext appContext = createAuthenticationSecurityObjectUnderTest();
 
-        try {
-            URI uri = appContext.createWebUrlForAuthentication(TEST_HTTPS_URL, new URI(TEST_API_URL));
+        String expectedTarget = URLEncoder.encode(TEST_API_URL, "UTF-8");
+        URI uri = appContext.createWebUrlForAuthentication(new URI(TEST_API_URL));
 
-            String parameter = getURIQueryParameter(uri, "x_a");
-            Assert.assertEquals(TEST_APP_ID, parameter);
-        } catch (Exception e) {
-            Assert.fail();
-        }
+        String parameter = getURIQueryParameter(uri, "x_target");
+        Assert.assertEquals(expectedTarget, parameter);
 
     }
 
     @Test
-    public void AuthContext_CreateWebUrlForAuth_ReturnsURI_AndQueryParam_x_b_MatchesURISignedWithAppKey() {
-        ID2LAppContext appContext = createAuthenticationSecurityObjectUnderTest();
-        String expectedSignedURI = D2LSigner.getBase64HashString(TEST_APP_KEY, TEST_API_URL);
-
-        try {
-            URI uri = appContext.createWebUrlForAuthentication(TEST_HTTP_URL, new URI(TEST_API_URL));
-
-            String parameter = getURIQueryParameter(uri, "x_b");
-            Assert.assertEquals(expectedSignedURI, parameter);
-        } catch (Exception e) {
-            Assert.fail();
-        }
-
-    }
-
-    @Test
-    public void AuthContext_CreateWebUrlForAuth_ReturnsURI_AndQueryParam_x_target_MatchesResultUrl() {
-        ID2LAppContext appContext = createAuthenticationSecurityObjectUnderTest();
-
-        try {
-            String expectedTarget = URLEncoder.encode(TEST_API_URL, "UTF-8");
-            URI uri = appContext.createWebUrlForAuthentication(TEST_HTTP_URL, new URI(TEST_API_URL));
-
-            String parameter = getURIQueryParameter(uri, "x_target");
-            Assert.assertEquals(expectedTarget, parameter);
-        } catch (Exception e) {
-            Assert.fail();
-        }
-    }
-
-    @Test
-    public void AuthContext_CreateWebUrlForAuth_ReturnsUri_AndQueryParam_x_target_MatchesEncodedResultUrl() {
+    public void AuthContext_CreateWebUrlForAuth_ReturnsUri_AndQueryParam_x_target_MatchesEncodedResultUrl() throws Exception {
         ID2LAppContext appContext = createAuthenticationSecurityObjectUnderTest();
         final String unencodedUrl = "http://univ.edu/d2l/api/resource?foo=bar";
-        try {
-            String encodedUrl = URLEncoder.encode(unencodedUrl, "UTF-8");
 
-            URI uri = appContext.createWebUrlForAuthentication(TEST_HTTP_URL, new URI(unencodedUrl));
+        String encodedUrl = URLEncoder.encode(unencodedUrl, "UTF-8");
 
-            String parameter = getURIQueryParameter(uri, "x_target");
-            Assert.assertEquals(encodedUrl, parameter);
-        } catch (Exception e) {
-            Assert.fail();
-        }
+        URI uri = appContext.createWebUrlForAuthentication(new URI(unencodedUrl));
 
+        String parameter = getURIQueryParameter(uri, "x_target");
+        Assert.assertEquals(encodedUrl, parameter);
     }
 
-    @Test
-    public void AuthContext_CreateOpContextFromResult_ReturnTypeIs_ID2LOperationSecurity() {
-        ID2LAppContext appContext = createAuthenticationSecurityObjectUnderTest();
-        URI resultURI = createResultURIWithUserIdAndKey(TEST_USER_ID, TEST_USER_KEY);
-
-        ID2LUserContext result = appContext.createUserContext(resultURI, TEST_HTTPS_URL);
-
-        assert result instanceof ID2LUserContext;
-    }
-    
     @Test
     public void AuthContext_CreateOpContextFromResult_UserId_IsSameAs_ResultUri_x_a_QueryParam() {
         ID2LAppContext appContext = createAuthenticationSecurityObjectUnderTest();
         final String expectedUserId = "344";
         URI resultURI = createResultURIWithUserIdAndKey(expectedUserId, TEST_USER_KEY);
 
-        ID2LUserContext userContext = appContext.createUserContext(resultURI, TEST_HTTPS_URL);
+        ID2LUserContext userContext = appContext.createUserContext(resultURI);
 
         Assert.assertEquals(expectedUserId, userContext.getUserId());
     }
 
-    @Test
-    public void AuthContext_CreateOpContextFromResult_If_x_a_IsAbsentFromResultUri_ReturnsNull() {
+    public void AuthContext_CreateOpContextFromResult_If_x_a_IsAbsentFromResultUri_ReturnsNull() throws URISyntaxException {
         ID2LAppContext appContext = createAuthenticationSecurityObjectUnderTest();
-        try {
-            ID2LUserContext userContext = appContext.createUserContext(new URI(TEST_API_URL), TEST_HTTPS_URL);
-            Assert.fail();
-        } catch (Exception e) {
 
-        }
-
+        ID2LUserContext userContext = appContext.createUserContext(new URI(TEST_API_URL));
+        Assert.assertNull(userContext);
     }
 
     @Test
     public void AuthContext_CreateOpContextFromResult_UserKeyIsSameAs_ResultUri_x_b_QueryParam() {
-        ID2LAppContext appContext = createAuthenticationSecurityObjectUnderTest();
+        ID2LAppContext appContext = AuthenticationSecurityFactory.createSecurityContext(TEST_APP_ID, TEST_APP_KEY, "http://thishost.com:1337/");
         final String expectedUserKey = "sampleUserKey";
         URI resultURI = createResultURIWithUserIdAndKey(TEST_USER_ID, expectedUserKey);
 
-        ID2LUserContext userContext = appContext.createUserContext(resultURI, TEST_HTTPS_URL);
+        ID2LUserContext userContext = appContext.createUserContext(resultURI);
 
         Assert.assertEquals(expectedUserKey, userContext.getUserKey());
     }
@@ -232,39 +182,17 @@ public class MainTest {
         ID2LAppContext appContext = createAuthenticationSecurityObjectUnderTest();
         URI resultURI = createResultURIWithUserIdAndKey(TEST_USER_ID, "");
 
-        ID2LUserContext userContext = appContext.createUserContext(resultURI, TEST_HTTPS_URL);
+        ID2LUserContext userContext = appContext.createUserContext(resultURI);
 
         Assert.assertNull(userContext);
     }
 
     @Test
-    public void OpContext_CreateAuthUri_IfEncryptOpsFlagIsSet_UsesHttpsScheme() {
-        ID2LAppContext appContext = createAuthenticationSecurityObjectUnderTest();
-        URI resultURI = createResultURIWithUserIdAndKey(TEST_USER_ID, TEST_USER_KEY);
-        ID2LUserContext userContext = appContext.createUserContext(resultURI, TEST_HTTPS_URL);
-
-        URI authURI = userContext.createAuthenticatedUri(TEST_API_PATH, "GET");
-
-        Assert.assertEquals("https", authURI.getScheme());
-    }
-
-    @Test
-    public void OpContext_CreateAuthUri_IfEncryptOpsFlagIsNotSet_UsesHttpScheme() {
-        ID2LAppContext appContext = createAuthenticationSecurityObjectUnderTest();
-        URI resultURI = createResultURIWithUserIdAndKey(TEST_USER_ID, TEST_USER_KEY);
-        ID2LUserContext userContext = appContext.createUserContext(resultURI, TEST_HTTP_URL);
-
-        URI authURI = userContext.createAuthenticatedUri(TEST_API_PATH, "DELETE");
-
-        Assert.assertEquals("http", authURI.getScheme());
-    }
-
-    @Test
     public void OpContext_CreateAuthUri_AuthUriHost_IsTheSameAs_OpContextHost() {
         final String expectedHostName = "host.com";
-        ID2LAppContext appContext = createAuthenticationSecurityObjectUnderTest();
+        ID2LAppContext appContext = AuthenticationSecurityFactory.createSecurityContext(TEST_APP_ID, TEST_APP_KEY, "http://host.com:1337/");
         URI resultURI = createResultURIWithUserIdAndKey(TEST_USER_ID, TEST_USER_KEY);
-        ID2LUserContext userContext = appContext.createUserContext(resultURI, "http://host.com:1234");
+        ID2LUserContext userContext = appContext.createUserContext(resultURI);
 
         URI authURI = userContext.createAuthenticatedUri(TEST_API_PATH, "DELETE");
 
@@ -274,9 +202,9 @@ public class MainTest {
     @Test
     public void OpContext_CreateAuthUri_AuthUriPort_IsTheSameAs_OpContextPort() {
         final int expectedPort = 44414;
-        ID2LAppContext appContext = createAuthenticationSecurityObjectUnderTest();
+        ID2LAppContext appContext = AuthenticationSecurityFactory.createSecurityContext(TEST_APP_ID, TEST_APP_KEY, "http://thishost.com:44414/");
         URI resultURI = createResultURIWithUserIdAndKey(TEST_USER_ID, TEST_USER_KEY);
-        ID2LUserContext userContext = appContext.createUserContext(resultURI, "http://anythinghere.com:44414");
+        ID2LUserContext userContext = appContext.createUserContext(resultURI);
 
         URI authURI = userContext.createAuthenticatedUri(TEST_API_PATH, "DELETE");
 
@@ -338,7 +266,7 @@ public class MainTest {
         final String expectedUserId = "24";
         ID2LAppContext appContext = createAuthenticationSecurityObjectUnderTest();
         URI resultURI = createResultURIWithUserIdAndKey(expectedUserId, TEST_USER_KEY);
-        ID2LUserContext userContext = appContext.createUserContext(resultURI, TEST_HTTPS_URL);
+        ID2LUserContext userContext = appContext.createUserContext(resultURI);
 
         URI authURI = userContext.createAuthenticatedUri(TEST_API_PATH, "GET");
 
@@ -379,7 +307,7 @@ public class MainTest {
         URI expectedAuthURI = userContext.createAuthenticatedUri(TEST_API_PATH, "GET");
         ID2LAppContext appContext = createAuthenticationSecurityObjectUnderTest();
 
-        ID2LUserContext userContextFromUserValues = appContext.createUserContext(TEST_USER_ID, TEST_USER_KEY, TEST_HTTPS_URL);
+        ID2LUserContext userContextFromUserValues = appContext.createUserContext(TEST_USER_ID, TEST_USER_KEY);
         setTimestampProviderReturnValue(TEST_TIMESTAMP_MILLISECONDS, (D2LUserContext) userContextFromUserValues);
         URI actualAuthURI = userContextFromUserValues.createAuthenticatedUri(TEST_API_PATH, "GET");
 
@@ -444,10 +372,15 @@ public class MainTest {
         userContext.calculateServerSkewFromResponse("Timestamp out of range\r\n");
         Assert.assertEquals(expectedSkew, userContext.getServerSkewMillis());
     }
+    
+    @Test
+    public void CreateAppContext_RemovesTrailingSlashFromUrl() {
+        D2LAppContext appContext = new D2LAppContext(TEST_APP_ID, TEST_APP_KEY, "http://thishost.com:1337/");
+        Assert.assertEquals("http://thishost.com:1337", appContext.getUrl());
+    }
 
-    private ID2LAppContext createAuthenticationSecurityObjectUnderTest() {
-        AuthenticationSecurityFactory factory = new AuthenticationSecurityFactory();
-        return factory.createSecurityContext(TEST_APP_ID, TEST_APP_KEY);
+    private D2LAppContext createAuthenticationSecurityObjectUnderTest() {
+        return new D2LAppContext(TEST_APP_ID, TEST_APP_KEY, TEST_HTTP_URL);
     }
 
     private void setTimestampProviderReturnValue(long milliseconds, D2LUserContext context) {
@@ -491,11 +424,8 @@ public class MainTest {
         throw new Exception("didn't find query parameter " + name);
     }
 
-    private ID2LUserContext createOperationSecurityObjectUnderTest() {
-        ID2LAppContext appContext = createAuthenticationSecurityObjectUnderTest();
-        URI resultURI = createResultURIWithUserIdAndKey(TEST_USER_ID, TEST_USER_KEY);
-
-        ID2LUserContext userContext = appContext.createUserContext(resultURI, TEST_HTTPS_URL);
+    private D2LUserContext createOperationSecurityObjectUnderTest() {
+        D2LUserContext userContext = new D2LUserContext(TEST_HTTP_URL, TEST_APP_ID, TEST_APP_KEY, new D2LUserContextParameters(TEST_USER_ID, TEST_USER_KEY));//appContext.createUserContext(resultURI);
         setTimestampProviderReturnValue(TEST_TIMESTAMP_MILLISECONDS, (D2LUserContext) userContext);
         return userContext;
     }
