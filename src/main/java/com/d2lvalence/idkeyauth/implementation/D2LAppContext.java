@@ -17,7 +17,6 @@
  */
 package com.d2lvalence.idkeyauth.implementation;
 
-import com.d2lvalence.idkeyauth.D2LUserContextParameters;
 import com.d2lvalence.idkeyauth.ID2LAppContext;
 import com.d2lvalence.idkeyauth.ID2LUserContext;
 import java.io.UnsupportedEncodingException;
@@ -94,8 +93,7 @@ public class D2LAppContext implements ID2LAppContext {
             if (userId == null || userKey == null) {
                 return null;
             }
-            D2LUserContextParameters parameters = compileOperationSecurityParameters(userId, userKey);
-            return new D2LUserContext(_url, _appId, _appKey, parameters);
+            return new D2LUserContext(_url, _appId, _appKey, userId, userKey);
         } else {
             return null;
         }
@@ -103,19 +101,12 @@ public class D2LAppContext implements ID2LAppContext {
 
     @Override
     public ID2LUserContext createUserContext(String userId, String userKey) {
-        D2LUserContextParameters parameters = compileOperationSecurityParameters(userId, userKey);
-        return new D2LUserContext(_url, _appId, _appKey, parameters);
+        return new D2LUserContext(_url, _appId, _appKey, userId, userKey);
     }
 
     @Override
     public ID2LUserContext createAnonymousUserContext() {
-        D2LUserContextParameters parameters = compileOperationSecurityParameters(null, null);
-        return new D2LUserContext(_url, _appId, _appKey, parameters);
-    }
-
-    @Override
-    public ID2LUserContext createUserContext(D2LUserContextParameters parameters) {
-        return new D2LUserContext(_url, _appId, _appKey, parameters);
+        return new D2LUserContext(_url, _appId, _appKey, null, null);
     }
 
     /**
@@ -136,20 +127,6 @@ public class D2LAppContext implements ID2LAppContext {
             result += "&" + CALLBACK_URL_PARAMETER + "=" + URLEncoder.encode(callbackUriString);
         }
         return result;
-    }
-
-    /**
-     * Stores the provided parameters in OperationSecurityParameters so that
-     * they can be saved and loaded via serialization
-     *
-     * @param userId The D2L user ID to be stored
-     * @param userKey The D2L user key to be stored
-     * @see OperationSecurityParameters
-     * @return
-     */
-    private D2LUserContextParameters compileOperationSecurityParameters(String userId, String userKey) {
-        D2LUserContextParameters parameters = new D2LUserContextParameters(userId, userKey);
-        return parameters;
     }
 
     public String getAppId() {

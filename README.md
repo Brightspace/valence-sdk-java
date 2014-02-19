@@ -16,8 +16,7 @@ appContext.createWebUrlForAuthentication(new URI("https://myhost.com/"));
 ```
 Create a user context with the user's key & secret that was requisitioned from the redirect:
 ```java
-ID2LUserContext userContext = appContext.createUserContext(
-    new D2LUserContextParameters("userId", "userKey"));
+ID2LUserContext userContext = appContext.createUserContext("userId", "userKey");
 ```
 Create the Authenticated URI from the user's context:
 ```java

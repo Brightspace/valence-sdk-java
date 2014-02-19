@@ -5,7 +5,6 @@
 package com.d2lvalence.idkeyauth.unittests;
 
 import com.d2lvalence.idkeyauth.AuthenticationSecurityFactory;
-import com.d2lvalence.idkeyauth.D2LUserContextParameters;
 import com.d2lvalence.idkeyauth.ID2LAppContext;
 import com.d2lvalence.idkeyauth.ID2LUserContext;
 import com.d2lvalence.idkeyauth.implementation.D2LAppContext;
@@ -425,7 +424,7 @@ public class MainTest {
     }
 
     private D2LUserContext createOperationSecurityObjectUnderTest() {
-        D2LUserContext userContext = new D2LUserContext(TEST_HTTP_URL, TEST_APP_ID, TEST_APP_KEY, new D2LUserContextParameters(TEST_USER_ID, TEST_USER_KEY));//appContext.createUserContext(resultURI);
+        D2LUserContext userContext = new D2LUserContext(TEST_HTTP_URL, TEST_APP_ID, TEST_APP_KEY, TEST_USER_ID, TEST_USER_KEY);
         setTimestampProviderReturnValue(TEST_TIMESTAMP_MILLISECONDS, (D2LUserContext) userContext);
         return userContext;
     }

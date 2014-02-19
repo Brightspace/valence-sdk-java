@@ -101,14 +101,8 @@ public interface ID2LUserContext {
      * @param resultCode - http result code, can include the successful result of 2XX in which case the stream is not read 
      * @param responseBody The message body returned by the server 
      * @return one of the RESULT_* results from this interface. Most commonly applications will minimally want to check 
-     * for RESULT_OKAY in order to proceed with interpretting results.
+     * for RESULT_OKAY in order to proceed with interpreting results.
      */
     public int interpretResult(int resultCode, String responseBody);
     
-    /**
-     * Returns the parameters used to authenticate with the user in this user context. This allows them to be cached and reloaded.
-     * 
-     * @return The UserContextParameters which contain information for this ID2LUserContext
-     */
-    public D2LUserContextParameters getParameters();
 }

@@ -33,7 +33,7 @@ public interface ID2LAppContext {
      * user has authenticated
      * @return A URI to redirect the user to
      */
-    URI createWebUrlForAuthentication(URI resultUri);
+    public URI createWebUrlForAuthentication(URI resultUri);
 
     /**
      * Creates an instance of ID2LUserContext with user parameters specified in
@@ -45,7 +45,7 @@ public interface ID2LAppContext {
      * the URI
      * @see ID2LUserContext
      */
-    ID2LUserContext createUserContext(URI uri);
+    public ID2LUserContext createUserContext(URI uri);
 
     /**
      * Creates an instance of ID2LUserContext with the parameters provided
@@ -56,7 +56,7 @@ public interface ID2LAppContext {
      * the URI
      * @see ID2LUserContext
      */
-    ID2LUserContext createUserContext(String userId, String userKey);
+    public ID2LUserContext createUserContext(String userId, String userKey);
 
     /**
      * Creates an instance of ID2LUserContext without user credentials
@@ -65,13 +65,5 @@ public interface ID2LAppContext {
      * @see ID2LUserContext
      */
     public ID2LUserContext createAnonymousUserContext();
-
-    /**
-     * Creates an instance of ID2LUserContext from the given parameters
-     *
-     * @param parameters The parameters to create the ID2LUserContext with
-     * @return The new ID2LUserContext
-     */
-    public ID2LUserContext createUserContext(D2LUserContextParameters parameters);
 
 }
