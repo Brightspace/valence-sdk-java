@@ -24,5 +24,8 @@ package com.d2lvalence.idkeyauth.implementation;
  */
 class D2LConstants {
     public static String AUTHENTICATION_SERVICE_URI_PATH = "/d2l/auth/api/token";
-    
+    @Deprecated
+    public static String URI_SECURE_SCHEME = "https";
+    @Deprecated
+    public static String URI_UNSECURE_SCHEME = "http";
 }

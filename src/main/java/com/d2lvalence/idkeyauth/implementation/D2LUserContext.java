@@ -17,6 +17,7 @@
  */
 package com.d2lvalence.idkeyauth.implementation;
 
+import com.d2lvalence.idkeyauth.D2LUserContextParameters;
 import com.d2lvalence.idkeyauth.ID2LUserContext;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -49,7 +50,8 @@ public class D2LUserContext implements ID2LUserContext {
      * @param url the url of the D2Linstance
      * @param appId the Application Id
      * @param appKey The Application Key
-     * @param parameters The parameters which the context should use
+     * @param userId the User Id
+     * @param userKey the User Key
      */
     public D2LUserContext(String url, String appId, String appKey, String userId, String userKey) {
         this.instanceUrl = url;
@@ -190,10 +192,21 @@ public class D2LUserContext implements ID2LUserContext {
             } else {
                 return D2LUserContext.RESULT_NO_PERMISSION;
             }
-
         }
-
         return D2LUserContext.RESULT_UNKNOWN;
+    }
+
+    public String getHostName() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public int getPort() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Deprecated
+    public D2LUserContextParameters getParameters() {
+        return new D2LUserContextParameters(appId, appKey, userId, userKey, userId);
     }
 
 }

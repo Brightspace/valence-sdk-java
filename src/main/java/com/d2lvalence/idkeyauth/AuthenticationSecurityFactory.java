@@ -37,4 +37,18 @@ public class AuthenticationSecurityFactory {
     public static ID2LAppContext createSecurityContext(String appId, String appKey, String url) {
         return new D2LAppContext(appId, appKey, url);
     }
+    
+        
+    /**
+     * Provides an instance of ID2LAppContext for managing connections to D2L servers with the application information
+     * 
+     * @param appId The application ID provided by the key tool 
+     * @param appKey  The application key provided by the key tool
+     * @return  An ID2LAppContext instance for managing connections to D2L servers with the given application information
+     * @see ID2LAppContext
+     */
+    @Deprecated
+    public ID2LAppContext createSecurityContext(String appId, String appKey) {
+        return new D2LAppContext(appId, appKey, null);
+    }
 }

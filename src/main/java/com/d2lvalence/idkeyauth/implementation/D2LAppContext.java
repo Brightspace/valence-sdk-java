@@ -17,6 +17,7 @@
  */
 package com.d2lvalence.idkeyauth.implementation;
 
+import com.d2lvalence.idkeyauth.D2LUserContextParameters;
 import com.d2lvalence.idkeyauth.ID2LAppContext;
 import com.d2lvalence.idkeyauth.ID2LUserContext;
 import java.io.UnsupportedEncodingException;
@@ -42,7 +43,7 @@ public class D2LAppContext implements ID2LAppContext {
 
     private final String _appId;
     private final String _appKey;
-    private final String _url;
+    private String _url;
 
     /**
      * Constructs a D2LAppContext with the provided application values
@@ -139,6 +140,44 @@ public class D2LAppContext implements ID2LAppContext {
 
     public String getUrl() {
         return _url;
+    }
+
+    @Deprecated
+    public ID2LUserContext createUserContext(D2LUserContextParameters parameters) {
+        return this.createUserContext(parameters.getUserId(), parameters.getUserKey());
+    }
+
+    @Deprecated
+    public URI createWebUrlForAuthentication(String host, int port, URI resultUri) {
+        return createWebUrlForAuthentication(host, port, true, resultUri);
+    }
+
+    @Deprecated
+    public URI createWebUrlForAuthentication(String host, int port, boolean encryptOperations, URI resultUri) {
+        String protocol = encryptOperations ? D2LConstants.URI_SECURE_SCHEME : D2LConstants.URI_UNSECURE_SCHEME;
+        this._url = protocol + host + ":" + port;
+        return this.createWebUrlForAuthentication(resultUri);
+    }
+
+    @Deprecated
+    public ID2LUserContext createUserContext(URI uri, String hostName, int port, boolean encryptOperations) {
+        String protocol = encryptOperations ? D2LConstants.URI_SECURE_SCHEME : D2LConstants.URI_UNSECURE_SCHEME;
+        this._url = protocol + hostName + ":" + port;
+        return this.createUserContext(uri);
+    }
+
+    @Deprecated
+    public ID2LUserContext createUserContext(String userId, String userKey, String hostName, int port, boolean encryptOperations) {
+        String protocol = encryptOperations ? D2LConstants.URI_SECURE_SCHEME : D2LConstants.URI_UNSECURE_SCHEME;
+        this._url = protocol + hostName + ":" + port;
+        return this.createUserContext(userId, userKey);
+    }
+
+    @Deprecated
+    public ID2LUserContext createAnonymousUserContext(String hostName, int port, boolean encryptOperations) {
+        String protocol = encryptOperations ? D2LConstants.URI_SECURE_SCHEME : D2LConstants.URI_UNSECURE_SCHEME;
+        this._url = protocol + hostName + ":" + port;
+        return this.createAnonymousUserContext();
     }
 
 }
