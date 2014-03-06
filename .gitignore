@@ -1,3 +1,4 @@
-build/*
-samples/GettingStartedSample/build/*
-lmsapi.jar
+.classpath
+.project
+.settings/
+target/
