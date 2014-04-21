@@ -20,7 +20,7 @@ package com.d2lvalence.idkeyauth.implementation;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import org.apache.commons.codec.binary.Base64; // for Base64.encode
+import com.d2lvalence.idkeyauth.codec.binary.Base64; // for Base64.encode
 
 /**
  * A convenience class to help with the signature generation used in the D2L authentication system
