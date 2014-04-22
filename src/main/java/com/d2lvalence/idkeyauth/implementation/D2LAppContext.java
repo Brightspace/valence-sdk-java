@@ -62,7 +62,6 @@ public class D2LAppContext implements ID2LAppContext {
         }
     }
 
-    @Override
     public URI createWebUrlForAuthentication(URI redirectUrl) {
         try {
             URI uri = new URI(_url + D2LConstants.AUTHENTICATION_SERVICE_URI_PATH + "?" + buildAuthenticationUriQueryString(redirectUrl));
@@ -84,7 +83,6 @@ public class D2LAppContext implements ID2LAppContext {
         return result;
     }
 
-    @Override
     public ID2LUserContext createUserContext(URI uri) {
         if(uri.getQuery() != null){
             HashMap<String, String> r = getParameters(uri.getQuery());
@@ -100,12 +98,10 @@ public class D2LAppContext implements ID2LAppContext {
         }
     }
 
-    @Override
     public ID2LUserContext createUserContext(String userId, String userKey) {
         return new D2LUserContext(_url, _appId, _appKey, userId, userKey);
     }
 
-    @Override
     public ID2LUserContext createAnonymousUserContext() {
         return new D2LUserContext(_url, _appId, _appKey, null, null);
     }
@@ -155,28 +151,28 @@ public class D2LAppContext implements ID2LAppContext {
     @Deprecated
     public URI createWebUrlForAuthentication(String host, int port, boolean encryptOperations, URI resultUri) {
         String protocol = encryptOperations ? D2LConstants.URI_SECURE_SCHEME : D2LConstants.URI_UNSECURE_SCHEME;
-        this._url = protocol + host + ":" + port;
+        this._url = protocol + "://" + host + ":" + port;
         return this.createWebUrlForAuthentication(resultUri);
     }
 
     @Deprecated
     public ID2LUserContext createUserContext(URI uri, String hostName, int port, boolean encryptOperations) {
         String protocol = encryptOperations ? D2LConstants.URI_SECURE_SCHEME : D2LConstants.URI_UNSECURE_SCHEME;
-        this._url = protocol + hostName + ":" + port;
+        this._url = protocol + "://" + hostName + ":" + port;
         return this.createUserContext(uri);
     }
 
     @Deprecated
     public ID2LUserContext createUserContext(String userId, String userKey, String hostName, int port, boolean encryptOperations) {
         String protocol = encryptOperations ? D2LConstants.URI_SECURE_SCHEME : D2LConstants.URI_UNSECURE_SCHEME;
-        this._url = protocol + hostName + ":" + port;
+        this._url = protocol + "://" + hostName + ":" + port;
         return this.createUserContext(userId, userKey);
     }
 
     @Deprecated
     public ID2LUserContext createAnonymousUserContext(String hostName, int port, boolean encryptOperations) {
         String protocol = encryptOperations ? D2LConstants.URI_SECURE_SCHEME : D2LConstants.URI_UNSECURE_SCHEME;
-        this._url = protocol + hostName + ":" + port;
+        this._url = protocol + "://" + hostName + ":" + port;
         return this.createAnonymousUserContext();
     }
 
