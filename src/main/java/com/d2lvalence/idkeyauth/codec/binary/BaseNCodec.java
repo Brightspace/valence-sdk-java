@@ -308,7 +308,6 @@ public abstract class BaseNCodec implements BinaryEncoder, BinaryDecoder {
      * @throws EncoderException
      *             if the parameter supplied is not of type byte[]
      */
-    @Override
     public Object encode(final Object obj) throws EncoderException {
         if (!(obj instanceof byte[])) {
             throw new EncoderException("Parameter supplied to Base-N encode is not a byte[]");
@@ -350,7 +349,6 @@ public abstract class BaseNCodec implements BinaryEncoder, BinaryDecoder {
      * @throws DecoderException
      *             if the parameter supplied is not of type byte[]
      */
-    @Override
     public Object decode(final Object obj) throws DecoderException {
         if (obj instanceof byte[]) {
             return decode((byte[]) obj);
@@ -379,7 +377,6 @@ public abstract class BaseNCodec implements BinaryEncoder, BinaryDecoder {
      *            A byte array containing Base-N character data
      * @return a byte array containing binary data
      */
-    @Override
     public byte[] decode(final byte[] pArray) {
         if (pArray == null || pArray.length == 0) {
             return pArray;
@@ -399,7 +396,6 @@ public abstract class BaseNCodec implements BinaryEncoder, BinaryDecoder {
      *            a byte array containing binary data
      * @return A byte array containing only the basen alphabetic character data
      */
-    @Override
     public byte[] encode(final byte[] pArray) {
         if (pArray == null || pArray.length == 0) {
             return pArray;

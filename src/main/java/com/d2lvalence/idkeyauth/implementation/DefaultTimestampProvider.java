@@ -30,7 +30,6 @@ class DefaultTimestampProvider implements ITimestampProvider {
      * 
      * @return The time in milliseconds
      */
-    @Override
     public long getCurrentTimestampInMilliseconds() {
         return System.currentTimeMillis();
     }

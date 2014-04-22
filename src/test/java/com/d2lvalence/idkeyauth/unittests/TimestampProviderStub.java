@@ -4,7 +4,6 @@ import com.d2lvalence.idkeyauth.implementation.ITimestampProvider;
 
 public class TimestampProviderStub implements ITimestampProvider {
     
-    @Override
     public long getCurrentTimestampInMilliseconds() {
             return m_milliseconds;
     }

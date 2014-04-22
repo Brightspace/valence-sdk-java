@@ -62,27 +62,22 @@ public class D2LUserContext implements ID2LUserContext {
         _timestampProvider = new DefaultTimestampProvider();
     }
 
-    @Override
     public String getUserId() {
         return userId;
     }
 
-    @Override
     public String getUserKey() {
         return userKey;
     }
 
-    @Override
     public long getServerSkewMillis() {
         return _serverSkewMillis;
     }
 
-    @Override
     public void setServerSkewMillis(long _serverSkewMillis) {
         this._serverSkewMillis = _serverSkewMillis;
     }
 
-    @Override
     public URI createAuthenticatedUri(String path, String httpMethod) {
         int split = path.indexOf("?");
         String query = "";
@@ -100,7 +95,6 @@ public class D2LUserContext implements ID2LUserContext {
         }
     }
 
-    @Override
     public boolean calculateServerSkewFromResponse(String responseBody) {
         TimestampParser timestampParser = new TimestampParser();
         long serverTimestampSeconds = timestampParser.tryParseTimestamp(responseBody);
@@ -180,7 +174,6 @@ public class D2LUserContext implements ID2LUserContext {
         return httpMethod.toUpperCase() + "&" + URI.create(path).getPath().toLowerCase() + "&" + timestampSeconds;
     }
 
-    @Override
     public int interpretResult(int resultCode, String responseBody) {
         if (resultCode == 200) {
             return D2LUserContext.RESULT_OKAY;
