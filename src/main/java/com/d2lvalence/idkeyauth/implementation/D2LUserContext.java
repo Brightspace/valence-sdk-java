@@ -187,7 +187,7 @@ public class D2LUserContext implements ID2LUserContext {
         } else if (resultCode == 403) {
             if (calculateServerSkewFromResponse(responseBody)) {
                 return D2LUserContext.RESULT_INVALID_TIMESTAMP;
-            } else if (responseBody.equals("Invalid Token")) {
+            } else if (responseBody.toLowerCase().equals("invalid token") || responseBody.toLowerCase().equals("token expired")) {
                 return D2LUserContext.RESULT_INVALID_SIG;
             } else {
                 return D2LUserContext.RESULT_NO_PERMISSION;
