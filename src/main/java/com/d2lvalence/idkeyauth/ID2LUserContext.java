@@ -88,6 +88,7 @@ public interface ID2LUserContext {
      * server receives it
      *
      * @param responseBody The response used to calculate the difference
+     * @return True if context had to account for server skew; otherwise, false.
      */
     public boolean calculateServerSkewFromResponse(String responseBody);
 

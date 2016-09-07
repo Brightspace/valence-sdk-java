@@ -30,6 +30,7 @@ public class AuthenticationSecurityFactory {
      *
      * @param appId The application ID provided by the key tool
      * @param appKey The application key provided by the key tool
+     * @param url Location of the Brightspace LMS instance
      * @return An ID2LAppContext instance for managing connections to D2L
      * servers with the given application information
      * @see ID2LAppContext
